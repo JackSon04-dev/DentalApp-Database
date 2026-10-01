@@ -4,6 +4,7 @@
 -- Phụ thuộc: phong_kham
 -- ============================================================================
 
+DROP TABLE IF EXISTS phong_dieu_tri CASCADE;
 CREATE TABLE phong_dieu_tri (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     phong_kham_id UUID NOT NULL
@@ -12,7 +13,6 @@ CREATE TABLE phong_dieu_tri (
     ten_phong     VARCHAR(150) NOT NULL,
     trang_thai    VARCHAR(20) NOT NULL DEFAULT 'san_sang'
                   CHECK (trang_thai IN ('san_sang', 'bao_tri', 'ngung_hoat_dong')),
-    trang_thiet_bi TEXT,
     ghi_chu       VARCHAR(500),
     created_at    TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at    TIMESTAMP NOT NULL DEFAULT NOW()

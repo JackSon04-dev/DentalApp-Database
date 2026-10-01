@@ -4,6 +4,7 @@
 -- Phụ thuộc: KHÔNG
 -- ============================================================================
 
+DROP TABLE IF EXISTS phac_do_mau CASCADE;
 CREATE TABLE phac_do_mau (
     id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_phac_do_mau       VARCHAR(30) UNIQUE,

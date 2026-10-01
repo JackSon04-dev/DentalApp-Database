@@ -28,11 +28,9 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 
 DROP TABLE IF EXISTS tai_khoan CASCADE;
-
 CREATE TABLE tai_khoan (
     id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     username           VARCHAR(100) NOT NULL,
-    email              VARCHAR(100) NOT NULL UNIQUE,
     password_hash      VARCHAR(255),
     google_id          VARCHAR(255) UNIQUE, -- Lưu mã định danh của Google
     loai_tai_khoan     VARCHAR(20)  NOT NULL
@@ -40,7 +38,6 @@ CREATE TABLE tai_khoan (
     trang_thai         VARCHAR(20)  NOT NULL DEFAULT 'hoat_dong'
                        CHECK (trang_thai IN ('hoat_dong', 'bi_khoa')),
     refresh_token      VARCHAR(500),
-    avatar_url         VARCHAR(500),
     created_at         TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at         TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -59,7 +56,6 @@ CREATE TRIGGER trg_tai_khoan_updated_at
 -- ============================================================================
 
 DROP TABLE IF EXISTS phong_kham CASCADE;
-
 CREATE TABLE phong_kham (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_phong_kham VARCHAR(20) UNIQUE,
@@ -87,6 +83,7 @@ CREATE TRIGGER trg_phong_kham_updated_at
 -- Luồng chính: Danh mục dịch vụ nha khoa để đặt lịch hẹn
 -- ============================================================================
 
+DROP TABLE IF EXISTS dich_vu CASCADE;
 CREATE TABLE dich_vu (
     id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_dich_vu             VARCHAR(20) UNIQUE,
@@ -106,6 +103,7 @@ CREATE TRIGGER trg_dich_vu_updated_at
 
 
 -- Bảng con: Chi Tiết Dịch Vụ (Variants)
+DROP TABLE IF EXISTS chi_tiet_dich_vu CASCADE;
 CREATE TABLE chi_tiet_dich_vu (
     id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     dich_vu_id             UUID NOT NULL
@@ -131,6 +129,7 @@ CREATE TRIGGER trg_chi_tiet_dich_vu_updated_at
 -- Luồng phụ: Quản lý kho vật tư, dụng cụ, thuốc
 -- ============================================================================
 
+DROP TABLE IF EXISTS san_pham CASCADE;
 CREATE TABLE san_pham (
     id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_san_pham        VARCHAR(30) UNIQUE,
@@ -164,6 +163,7 @@ CREATE TRIGGER trg_san_pham_updated_at
 -- ============================================================================
 
 
+DROP TABLE IF EXISTS nha_cung_cap CASCADE;
 CREATE TABLE nha_cung_cap (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_ncc            VARCHAR(30) UNIQUE,
@@ -192,6 +192,7 @@ CREATE TRIGGER trg_nha_cung_cap_updated_at
 -- Phụ thuộc: KHÔNG
 -- ============================================================================
 
+DROP TABLE IF EXISTS phac_do_mau CASCADE;
 CREATE TABLE phac_do_mau (
     id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_phac_do_mau       VARCHAR(30) UNIQUE,
@@ -211,25 +212,29 @@ CREATE TRIGGER trg_phac_do_mau_updated_at
 
 -- ============================================================================
 -- 07. BỆNH NHÂN (Level 1)
--- Luồng chính: Bước 2 - Tạo hồ sơ bệnh nhân sau khi có tài khoản
--- Phụ thuộc: tai_khoan (1:1)
+-- Luồng chính: Quản lý thông tin hồ sơ y tế bệnh nhân
+-- Phụ thuộc: tai_khoan
 -- ============================================================================
 
+DROP TABLE IF EXISTS benh_nhan CASCADE;
 CREATE TABLE benh_nhan (
     id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tai_khoan_id           UUID UNIQUE NOT NULL
+    tai_khoan_id           UUID NOT NULL UNIQUE
                            REFERENCES tai_khoan(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    ma_benh_nhan           VARCHAR(20) UNIQUE,
+    ma_benh_nhan           VARCHAR(30) UNIQUE,
     ho_ten                 VARCHAR(150) NOT NULL,
     ngay_sinh              DATE,
-    gioi_tinh              VARCHAR(10)
-                           CHECK (gioi_tinh IN ('nam', 'nu', 'khac')),
+    gioi_tinh              VARCHAR(10) CHECK (gioi_tinh IN ('nam', 'nu', 'khac')),
     sdt                    VARCHAR(20) UNIQUE,
     email                  VARCHAR(150),
     dia_chi                VARCHAR(500),
+    hinh_anh_url           VARCHAR(500),
+    
+    -- Trường đặc thù
     tien_su_benh           TEXT,
     di_ung                 TEXT,
     ghi_chu                TEXT,
+    
     created_at             TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at             TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -238,32 +243,33 @@ CREATE TRIGGER trg_benh_nhan_updated_at
     BEFORE UPDATE ON benh_nhan
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
 
-
-
 -- ============================================================================
 -- 08. NHA SĨ (Level 1)
--- Luồng chính: Nha sĩ khám bệnh - cần trước khi tạo lịch hẹn
--- Phụ thuộc: tai_khoan (1:1), phong_dieu_tri (optional)
+-- Luồng chính: Quản lý thông tin bác sĩ điều trị
+-- Phụ thuộc: tai_khoan
 -- ============================================================================
 
 DROP TABLE IF EXISTS nha_si CASCADE;
-
 CREATE TABLE nha_si (
     id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tai_khoan_id          UUID UNIQUE NOT NULL
+    tai_khoan_id          UUID NOT NULL UNIQUE
                           REFERENCES tai_khoan(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    ma_nha_si             VARCHAR(50) UNIQUE NOT NULL,
-    ho_ten                VARCHAR(100) NOT NULL,
+    ma_nha_si             VARCHAR(30) UNIQUE,
+    ho_ten                VARCHAR(150) NOT NULL,
     ngay_sinh             DATE,
-    sdt                   VARCHAR(20),
-    dia_chi               TEXT,
     gioi_tinh             VARCHAR(10) CHECK (gioi_tinh IN ('nam', 'nu', 'khac')),
-    hinh_anh_url          VARCHAR(255),
+    sdt                   VARCHAR(20) UNIQUE,
+    email                 VARCHAR(150),
+    dia_chi               VARCHAR(500),
+    hinh_anh_url          VARCHAR(500),
+    
+    -- Trường đặc thù
     chuyen_khoa           VARCHAR(100),
     gioi_thieu            TEXT,
     so_giay_phep          VARCHAR(100),
     trang_thai            VARCHAR(20) NOT NULL DEFAULT 'dang_lam_viec'
                           CHECK (trang_thai IN ('dang_lam_viec', 'nghi_phep', 'nghi_viec')),
+                          
     created_at            TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at            TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -272,28 +278,32 @@ CREATE TRIGGER trg_nha_si_updated_at
     BEFORE UPDATE ON nha_si
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
 
-
 -- ============================================================================
 -- 09. NHÂN VIÊN (Level 1)
--- Luồng chính: Lễ tân / Thu ngân thực hiện thanh toán
--- Phụ thuộc: tai_khoan (1:1)
+-- Luồng chính: Quản lý lễ tân, thu ngân, kho
+-- Phụ thuộc: tai_khoan
 -- ============================================================================
 
+DROP TABLE IF EXISTS nhan_vien CASCADE;
 CREATE TABLE nhan_vien (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tai_khoan_id UUID UNIQUE NOT NULL
+    tai_khoan_id UUID NOT NULL UNIQUE
                  REFERENCES tai_khoan(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    ma_nhan_vien VARCHAR(20) UNIQUE,
+    ma_nhan_vien VARCHAR(30) UNIQUE,
     ho_ten       VARCHAR(150) NOT NULL,
     ngay_sinh    DATE,
     gioi_tinh    VARCHAR(10) CHECK (gioi_tinh IN ('nam', 'nu', 'khac')),
-    chuc_vu      VARCHAR(30) NOT NULL
-                 CHECK (chuc_vu IN ('le_tan', 'quan_ly', 'quan_ly_kho')),
-    sdt          VARCHAR(20),
+    sdt          VARCHAR(20) UNIQUE,
     email        VARCHAR(150),
     dia_chi      VARCHAR(500),
+    hinh_anh_url VARCHAR(500),
+    
+    -- Trường đặc thù
+    chuc_vu      VARCHAR(30) NOT NULL
+                 CHECK (chuc_vu IN ('le_tan', 'quan_ly', 'quan_ly_kho')),
     trang_thai   VARCHAR(20) NOT NULL DEFAULT 'dang_lam_viec'
                  CHECK (trang_thai IN ('dang_lam_viec', 'nghi_phep', 'nghi_viec')),
+                 
     created_at   TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at   TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -302,15 +312,13 @@ CREATE TRIGGER trg_nhan_vien_updated_at
     BEFORE UPDATE ON nhan_vien
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
 
-
-
-
 -- ============================================================================
 -- 10. PHÒNG ĐIỀU TRỊ (Level 1)
 -- Luồng chính: Phòng khám bệnh - cần trước khi tạo lịch hẹn
 -- Phụ thuộc: phong_kham
 -- ============================================================================
 
+DROP TABLE IF EXISTS phong_dieu_tri CASCADE;
 CREATE TABLE phong_dieu_tri (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     phong_kham_id UUID NOT NULL
@@ -319,7 +327,6 @@ CREATE TABLE phong_dieu_tri (
     ten_phong     VARCHAR(150) NOT NULL,
     trang_thai    VARCHAR(20) NOT NULL DEFAULT 'san_sang'
                   CHECK (trang_thai IN ('san_sang', 'bao_tri', 'ngung_hoat_dong')),
-    trang_thiet_bi TEXT,
     ghi_chu       VARCHAR(500),
     created_at    TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at    TIMESTAMP NOT NULL DEFAULT NOW()
@@ -336,6 +343,7 @@ CREATE TRIGGER trg_phong_dieu_tri_updated_at
 -- Phụ thuộc: san_pham, nha_cung_cap
 -- ============================================================================
 
+DROP TABLE IF EXISTS san_pham_nha_cung_cap CASCADE;
 CREATE TABLE san_pham_nha_cung_cap (
     id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     san_pham_id              UUID NOT NULL
@@ -361,6 +369,7 @@ CREATE TRIGGER trg_san_pham_nha_cung_cap_updated_at
 -- Phụ thuộc: phac_do_mau, dich_vu
 -- ============================================================================
 
+DROP TABLE IF EXISTS chi_tiet_phac_do_mau CASCADE;
 CREATE TABLE chi_tiet_phac_do_mau (
     id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     phac_do_mau_id           UUID NOT NULL
@@ -386,6 +395,7 @@ CREATE TRIGGER trg_chi_tiet_phac_do_mau_updated_at
 -- Phụ thuộc: nha_si, phong_dieu_tri
 -- ============================================================================
 
+DROP TABLE IF EXISTS ca_lam_viec CASCADE;
 CREATE TABLE ca_lam_viec (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nha_si_id         UUID NOT NULL
@@ -413,6 +423,7 @@ CREATE TRIGGER trg_ca_lam_viec_updated_at
 -- ============================================================================
 
 
+DROP TABLE IF EXISTS phieu_nhap_kho CASCADE;
 CREATE TABLE phieu_nhap_kho (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_phieu_nhap_kho   VARCHAR(30) UNIQUE,
@@ -421,7 +432,6 @@ CREATE TABLE phieu_nhap_kho (
     nhan_vien_id    UUID NOT NULL
                     REFERENCES nhan_vien(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     ngay_nhap       TIMESTAMP NOT NULL DEFAULT NOW(),
-    tong_tien       DECIMAL(18, 2) NOT NULL DEFAULT 0,
     trang_thai      VARCHAR(20) NOT NULL DEFAULT 'nhap_moi'
                     CHECK (trang_thai IN ('nhap_moi', 'da_duyet', 'da_huy')),
     nguoi_duyet_id  UUID
@@ -441,6 +451,7 @@ CREATE TRIGGER trg_phieu_nhap_kho_updated_at
 -- Phụ thuộc: benh_nhan, nha_si, dich_vu, 
 -- ============================================================================
 
+DROP TABLE IF EXISTS lich_hen CASCADE;
 CREATE TABLE lich_hen (
     id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_lich_hen          VARCHAR(30) UNIQUE,
@@ -474,6 +485,7 @@ CREATE TRIGGER trg_lich_hen_updated_at
 -- Phụ thuộc: benh_nhan, nha_si, phac_do_mau (optional)
 -- ============================================================================
 
+DROP TABLE IF EXISTS phac_do_dieu_tri CASCADE;
 CREATE TABLE phac_do_dieu_tri (
     id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_phac_do               VARCHAR(30) UNIQUE,
@@ -490,13 +502,10 @@ CREATE TABLE phac_do_dieu_tri (
     hinh_thuc_thanh_toan     VARCHAR(20) NOT NULL DEFAULT 'tung_giai_doan'
                              CHECK (hinh_thuc_thanh_toan IN ('tron_goi', 'tung_giai_doan')),
     tong_chi_phi             DECIMAL(18, 2) NOT NULL DEFAULT 0,
-    tong_da_tra              DECIMAL(18, 2) NOT NULL DEFAULT 0,
-    tong_con_lai             DECIMAL(18, 2) NOT NULL DEFAULT 0,
     
     -- TRẠNG THÁI & TIẾN ĐỘ
     trang_thai               VARCHAR(20) NOT NULL DEFAULT 'dang_dieu_tri'
                              CHECK (trang_thai IN ('dang_dieu_tri', 'hoan_thanh', 'tam_dung', 'da_huy')),
-    tien_do_phan_tram        DECIMAL(5, 2) NOT NULL DEFAULT 0,
     ngay_bat_dau             DATE,
     ngay_du_kien_hoan_thanh  DATE,
     ngay_hoan_thanh_thuc_te  DATE,
@@ -515,6 +524,7 @@ CREATE TRIGGER trg_phac_do_dieu_tri_updated_at
 -- Phụ thuộc: phieu_nhap_kho, san_pham
 -- ============================================================================
 
+DROP TABLE IF EXISTS chi_tiet_nhap_kho CASCADE;
 CREATE TABLE chi_tiet_nhap_kho (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     phieu_nhap_id UUID NOT NULL
@@ -523,7 +533,6 @@ CREATE TABLE chi_tiet_nhap_kho (
                   REFERENCES san_pham(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     so_luong      INTEGER NOT NULL,
     don_gia_nhap  DECIMAL(18, 2) NOT NULL,
-    thanh_tien    DECIMAL(18, 2) NOT NULL,
     so_lo         VARCHAR(50),
     han_su_dung   DATE,
     ghi_chu       VARCHAR(500),
@@ -542,6 +551,7 @@ CREATE TRIGGER trg_chi_tiet_nhap_kho_updated_at
 -- Phụ thuộc: lich_hen (1:1)
 -- ============================================================================
 
+DROP TABLE IF EXISTS ho_so_benh_an CASCADE;
 CREATE TABLE ho_so_benh_an (
     id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_ho_so              VARCHAR(30) UNIQUE,
@@ -570,6 +580,7 @@ CREATE TRIGGER trg_ho_so_benh_an_updated_at
 -- Phụ thuộc: lich_hen, phac_do_dieu_tri (optional)
 -- ============================================================================
 
+DROP TABLE IF EXISTS hoa_don CASCADE;
 CREATE TABLE hoa_don (
     id                        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_hoa_don                VARCHAR(30) UNIQUE,
@@ -579,8 +590,6 @@ CREATE TABLE hoa_don (
                               REFERENCES phac_do_dieu_tri(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     tong_tien_truoc_giam_gia  DECIMAL(18, 2) NOT NULL DEFAULT 0,
     tong_tien_sau_giam_gia    DECIMAL(18, 2) NOT NULL DEFAULT 0,
-    so_tien_da_thanh_toan     DECIMAL(18, 2) NOT NULL DEFAULT 0,
-    so_tien_con_lai           DECIMAL(18, 2) NOT NULL DEFAULT 0,
     trang_thai_thanh_toan     VARCHAR(30) NOT NULL DEFAULT 'chua_thanh_toan'
                               CHECK (trang_thai_thanh_toan IN (
                                   'chua_thanh_toan', 'thanh_toan_mot_phan',
@@ -602,6 +611,7 @@ CREATE TRIGGER trg_hoa_don_updated_at
 -- Phụ thuộc: ho_so_benh_an, dich_vu, nha_si
 -- ============================================================================
 
+DROP TABLE IF EXISTS dich_vu_dieu_tri CASCADE;
 CREATE TABLE dich_vu_dieu_tri (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ho_so_id    UUID NOT NULL
@@ -611,7 +621,6 @@ CREATE TABLE dich_vu_dieu_tri (
     so_luong    INTEGER NOT NULL DEFAULT 1,
     don_gia     DECIMAL(18, 2) NOT NULL,
     giam_gia    DECIMAL(18, 2) NOT NULL DEFAULT 0,
-    thanh_tien  DECIMAL(18, 2) NOT NULL,
     vi_tri_rang VARCHAR(50),
     ghi_chu     TEXT,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -632,6 +641,7 @@ CREATE TRIGGER trg_dich_vu_dieu_tri_updated_at
 -- Phụ thuộc: hoa_don, nhan_vien
 -- ============================================================================
 
+DROP TABLE IF EXISTS thanh_toan CASCADE;
 CREATE TABLE thanh_toan (
     id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_thanh_toan    VARCHAR(30) UNIQUE,
@@ -662,6 +672,7 @@ CREATE TRIGGER trg_thanh_toan_updated_at
 -- Phụ thuộc: ho_so_benh_an, nha_si
 -- ============================================================================
 
+DROP TABLE IF EXISTS don_thuoc CASCADE;
 CREATE TABLE don_thuoc (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_don_thuoc VARCHAR(30) UNIQUE,
@@ -690,6 +701,7 @@ CREATE TRIGGER trg_don_thuoc_updated_at
 -- Phụ thuộc: ho_so_benh_an, san_pham
 -- ============================================================================
 
+DROP TABLE IF EXISTS vat_tu_su_dung CASCADE;
 CREATE TABLE vat_tu_su_dung (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ho_so_id    UUID NOT NULL
@@ -699,7 +711,6 @@ CREATE TABLE vat_tu_su_dung (
     so_luong    INTEGER NOT NULL,
     don_gia     DECIMAL(18, 2) NOT NULL DEFAULT 0,
     giam_gia    DECIMAL(18, 2) NOT NULL DEFAULT 0,
-    thanh_tien  DECIMAL(18, 2) NOT NULL DEFAULT 0,
     ghi_chu     VARCHAR(500),
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMP NOT NULL DEFAULT NOW()
@@ -718,6 +729,7 @@ CREATE TRIGGER trg_vat_tu_su_dung_updated_at
 -- Phụ thuộc: phac_do_dieu_tri, lich_hen, self-ref
 -- ============================================================================
 
+DROP TABLE IF EXISTS giai_doan_phac_do CASCADE;
 CREATE TABLE giai_doan_phac_do (
     id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     phac_do_id         UUID NOT NULL
@@ -768,6 +780,7 @@ CREATE TRIGGER trg_giai_doan_phac_do_updated_at
 -- Phụ thuộc: don_thuoc
 -- ============================================================================
 
+DROP TABLE IF EXISTS chi_tiet_don_thuoc CASCADE;
 CREATE TABLE chi_tiet_don_thuoc (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     don_thuoc_id  UUID NOT NULL

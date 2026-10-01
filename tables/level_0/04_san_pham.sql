@@ -4,6 +4,7 @@
 -- Luồng phụ: Quản lý kho vật tư, dụng cụ, thuốc
 -- ============================================================================
 
+DROP TABLE IF EXISTS san_pham CASCADE;
 CREATE TABLE san_pham (
     id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_san_pham        VARCHAR(30) UNIQUE,

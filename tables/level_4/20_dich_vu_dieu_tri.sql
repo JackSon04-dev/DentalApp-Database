@@ -4,6 +4,7 @@
 -- Phụ thuộc: ho_so_benh_an, dich_vu, nha_si
 -- ============================================================================
 
+DROP TABLE IF EXISTS dich_vu_dieu_tri CASCADE;
 CREATE TABLE dich_vu_dieu_tri (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ho_so_id    UUID NOT NULL
@@ -13,7 +14,6 @@ CREATE TABLE dich_vu_dieu_tri (
     so_luong    INTEGER NOT NULL DEFAULT 1,
     don_gia     DECIMAL(18, 2) NOT NULL,
     giam_gia    DECIMAL(18, 2) NOT NULL DEFAULT 0,
-    thanh_tien  DECIMAL(18, 2) NOT NULL,
     vi_tri_rang VARCHAR(50),
     ghi_chu     TEXT,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),

@@ -4,6 +4,7 @@
 -- Phụ thuộc: ho_so_benh_an, nha_si
 -- ============================================================================
 
+DROP TABLE IF EXISTS don_thuoc CASCADE;
 CREATE TABLE don_thuoc (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_don_thuoc VARCHAR(30) UNIQUE,

@@ -4,6 +4,7 @@
 -- Phụ thuộc: don_thuoc
 -- ============================================================================
 
+DROP TABLE IF EXISTS chi_tiet_don_thuoc CASCADE;
 CREATE TABLE chi_tiet_don_thuoc (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     don_thuoc_id  UUID NOT NULL

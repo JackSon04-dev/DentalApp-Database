@@ -5,6 +5,7 @@
 -- ============================================================================
 
 
+DROP TABLE IF EXISTS phieu_nhap_kho CASCADE;
 CREATE TABLE phieu_nhap_kho (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_phieu_nhap_kho   VARCHAR(30) UNIQUE,
@@ -13,7 +14,6 @@ CREATE TABLE phieu_nhap_kho (
     nhan_vien_id    UUID NOT NULL
                     REFERENCES nhan_vien(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     ngay_nhap       TIMESTAMP NOT NULL DEFAULT NOW(),
-    tong_tien       DECIMAL(18, 2) NOT NULL DEFAULT 0,
     trang_thai      VARCHAR(20) NOT NULL DEFAULT 'nhap_moi'
                     CHECK (trang_thai IN ('nhap_moi', 'da_duyet', 'da_huy')),
     nguoi_duyet_id  UUID

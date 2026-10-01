@@ -5,7 +5,6 @@
 -- ============================================================================
 
 DROP TABLE IF EXISTS phong_kham CASCADE;
-
 CREATE TABLE phong_kham (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_phong_kham VARCHAR(20) UNIQUE,

@@ -6,6 +6,7 @@
 -- Phụ thuộc: phac_do_dieu_tri, lich_hen, self-ref
 -- ============================================================================
 
+DROP TABLE IF EXISTS giai_doan_phac_do CASCADE;
 CREATE TABLE giai_doan_phac_do (
     id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     phac_do_id         UUID NOT NULL

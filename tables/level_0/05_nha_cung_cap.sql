@@ -5,6 +5,7 @@
 -- ============================================================================
 
 
+DROP TABLE IF EXISTS nha_cung_cap CASCADE;
 CREATE TABLE nha_cung_cap (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_ncc            VARCHAR(30) UNIQUE,

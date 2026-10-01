@@ -4,6 +4,7 @@
 -- Phụ thuộc: hoa_don, nhan_vien
 -- ============================================================================
 
+DROP TABLE IF EXISTS thanh_toan CASCADE;
 CREATE TABLE thanh_toan (
     id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_thanh_toan    VARCHAR(30) UNIQUE,

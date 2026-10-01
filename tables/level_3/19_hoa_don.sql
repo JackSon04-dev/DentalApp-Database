@@ -4,6 +4,7 @@
 -- Phụ thuộc: lich_hen, phac_do_dieu_tri (optional)
 -- ============================================================================
 
+DROP TABLE IF EXISTS hoa_don CASCADE;
 CREATE TABLE hoa_don (
     id                        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_hoa_don                VARCHAR(30) UNIQUE,
@@ -13,8 +14,6 @@ CREATE TABLE hoa_don (
                               REFERENCES phac_do_dieu_tri(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     tong_tien_truoc_giam_gia  DECIMAL(18, 2) NOT NULL DEFAULT 0,
     tong_tien_sau_giam_gia    DECIMAL(18, 2) NOT NULL DEFAULT 0,
-    so_tien_da_thanh_toan     DECIMAL(18, 2) NOT NULL DEFAULT 0,
-    so_tien_con_lai           DECIMAL(18, 2) NOT NULL DEFAULT 0,
     trang_thai_thanh_toan     VARCHAR(30) NOT NULL DEFAULT 'chua_thanh_toan'
                               CHECK (trang_thai_thanh_toan IN (
                                   'chua_thanh_toan', 'thanh_toan_mot_phan',

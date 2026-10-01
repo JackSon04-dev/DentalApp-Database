@@ -4,6 +4,7 @@
 -- Phụ thuộc: nha_si, phong_dieu_tri
 -- ============================================================================
 
+DROP TABLE IF EXISTS ca_lam_viec CASCADE;
 CREATE TABLE ca_lam_viec (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nha_si_id         UUID NOT NULL

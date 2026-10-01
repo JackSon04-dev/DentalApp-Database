@@ -4,6 +4,7 @@
 -- Phụ thuộc: lich_hen (1:1)
 -- ============================================================================
 
+DROP TABLE IF EXISTS ho_so_benh_an CASCADE;
 CREATE TABLE ho_so_benh_an (
     id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_ho_so              VARCHAR(30) UNIQUE,

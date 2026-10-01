@@ -4,6 +4,7 @@
 -- Phụ thuộc: phac_do_mau, dich_vu
 -- ============================================================================
 
+DROP TABLE IF EXISTS chi_tiet_phac_do_mau CASCADE;
 CREATE TABLE chi_tiet_phac_do_mau (
     id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     phac_do_mau_id           UUID NOT NULL

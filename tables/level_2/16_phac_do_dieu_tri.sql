@@ -4,6 +4,7 @@
 -- Phụ thuộc: benh_nhan, nha_si, phac_do_mau (optional)
 -- ============================================================================
 
+DROP TABLE IF EXISTS phac_do_dieu_tri CASCADE;
 CREATE TABLE phac_do_dieu_tri (
     id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_phac_do               VARCHAR(30) UNIQUE,
@@ -20,13 +21,10 @@ CREATE TABLE phac_do_dieu_tri (
     hinh_thuc_thanh_toan     VARCHAR(20) NOT NULL DEFAULT 'tung_giai_doan'
                              CHECK (hinh_thuc_thanh_toan IN ('tron_goi', 'tung_giai_doan')),
     tong_chi_phi             DECIMAL(18, 2) NOT NULL DEFAULT 0,
-    tong_da_tra              DECIMAL(18, 2) NOT NULL DEFAULT 0,
-    tong_con_lai             DECIMAL(18, 2) NOT NULL DEFAULT 0,
     
     -- TRẠNG THÁI & TIẾN ĐỘ
     trang_thai               VARCHAR(20) NOT NULL DEFAULT 'dang_dieu_tri'
                              CHECK (trang_thai IN ('dang_dieu_tri', 'hoan_thanh', 'tam_dung', 'da_huy')),
-    tien_do_phan_tram        DECIMAL(5, 2) NOT NULL DEFAULT 0,
     ngay_bat_dau             DATE,
     ngay_du_kien_hoan_thanh  DATE,
     ngay_hoan_thanh_thuc_te  DATE,

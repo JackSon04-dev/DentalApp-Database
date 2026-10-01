@@ -4,6 +4,7 @@
 -- Luồng chính: Danh mục dịch vụ nha khoa để đặt lịch hẹn
 -- ============================================================================
 
+DROP TABLE IF EXISTS dich_vu CASCADE;
 CREATE TABLE dich_vu (
     id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ma_dich_vu             VARCHAR(20) UNIQUE,
@@ -23,6 +24,7 @@ CREATE TRIGGER trg_dich_vu_updated_at
 
 
 -- Bảng con: Chi Tiết Dịch Vụ (Variants)
+DROP TABLE IF EXISTS chi_tiet_dich_vu CASCADE;
 CREATE TABLE chi_tiet_dich_vu (
     id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     dich_vu_id             UUID NOT NULL

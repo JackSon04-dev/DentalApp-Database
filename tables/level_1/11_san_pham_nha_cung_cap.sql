@@ -4,6 +4,7 @@
 -- Phụ thuộc: san_pham, nha_cung_cap
 -- ============================================================================
 
+DROP TABLE IF EXISTS san_pham_nha_cung_cap CASCADE;
 CREATE TABLE san_pham_nha_cung_cap (
     id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     san_pham_id              UUID NOT NULL
