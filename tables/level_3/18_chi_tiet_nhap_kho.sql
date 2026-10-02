@@ -1,5 +1,5 @@
 -- ============================================================================
--- 17. CHI TIẾT NHẬP KHO (Level 3)
+-- 18. CHI TIẾT NHẬP KHO (Level 3)
 -- Luồng phụ: Danh sách sản phẩm trong phiếu nhập kho
 -- Phụ thuộc: phieu_nhap_kho, san_pham
 -- ============================================================================

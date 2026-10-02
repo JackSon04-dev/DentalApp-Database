@@ -1,7 +1,7 @@
 -- ============================================================================
 -- DENTAL CLINIC DATABASE - SCHEMA TỔNG HỢP
 -- Tự động sinh từ 26 file SQL theo thứ tự dependency (Level 0 → 5)
--- Ngày cập nhật: 2026-10-01
+-- Ngày cập nhật: 2026-10-02
 -- ============================================================================
 
 -- ============================================================================
@@ -79,7 +79,6 @@ CREATE TRIGGER trg_phong_kham_updated_at
 
 -- ============================================================================
 -- 03. DỊCH VỤ (Level 0 - Bảng gốc)
--- Tách thành 2 bảng: dich_vu (bảng cha) và chi_tiet_dich_vu (bảng con/variant)
 -- Luồng chính: Danh mục dịch vụ nha khoa để đặt lịch hẹn
 -- ============================================================================
 
@@ -100,28 +99,6 @@ CREATE TABLE dich_vu (
 CREATE TRIGGER trg_dich_vu_updated_at
     BEFORE UPDATE ON dich_vu
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
-
-
--- Bảng con: Chi Tiết Dịch Vụ (Variants)
-DROP TABLE IF EXISTS chi_tiet_dich_vu CASCADE;
-CREATE TABLE chi_tiet_dich_vu (
-    id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    dich_vu_id             UUID NOT NULL
-                           REFERENCES dich_vu(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    ten_chi_tiet           VARCHAR(200) NOT NULL,
-    gia                    DECIMAL(18, 2) NOT NULL DEFAULT 0,
-    don_vi_tinh            VARCHAR(50),
-    trang_thai             VARCHAR(20) NOT NULL DEFAULT 'hoat_dong'
-                           CHECK (trang_thai IN ('hoat_dong', 'ngung_cung_cap')),
-    created_at             TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at             TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
-CREATE TRIGGER trg_chi_tiet_dich_vu_updated_at
-    BEFORE UPDATE ON chi_tiet_dich_vu
-    FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
-
-
 
 -- ============================================================================
 -- 04. SẢN PHẨM (Level 0 - Bảng gốc)
@@ -211,7 +188,31 @@ CREATE TRIGGER trg_phac_do_mau_updated_at
 
 
 -- ============================================================================
--- 07. BỆNH NHÂN (Level 1)
+-- 07. CHI TIẾT DỊCH VỤ (Level 1)
+-- Phụ thuộc: dich_vu
+-- ============================================================================
+
+DROP TABLE IF EXISTS chi_tiet_dich_vu CASCADE;
+CREATE TABLE chi_tiet_dich_vu (
+    id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    dich_vu_id             UUID NOT NULL
+                           REFERENCES dich_vu(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    ma_chi_tiet           VARCHAR(20) UNIQUE,
+    ten_chi_tiet           VARCHAR(200) NOT NULL,
+    gia                    DECIMAL(18, 2) NOT NULL DEFAULT 0,
+    don_vi_tinh            VARCHAR(50),
+    trang_thai             VARCHAR(20) NOT NULL DEFAULT 'hoat_dong'
+                           CHECK (trang_thai IN ('hoat_dong', 'ngung_cung_cap')),
+    created_at             TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at             TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TRIGGER trg_chi_tiet_dich_vu_updated_at
+    BEFORE UPDATE ON chi_tiet_dich_vu
+    FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
+-- ============================================================================
+-- 08. BỆNH NHÂN (Level 1)
 -- Luồng chính: Quản lý thông tin hồ sơ y tế bệnh nhân
 -- Phụ thuộc: tai_khoan
 -- ============================================================================
@@ -244,7 +245,7 @@ CREATE TRIGGER trg_benh_nhan_updated_at
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
 
 -- ============================================================================
--- 08. NHA SĨ (Level 1)
+-- 09. NHA SĨ (Level 1)
 -- Luồng chính: Quản lý thông tin bác sĩ điều trị
 -- Phụ thuộc: tai_khoan
 -- ============================================================================
@@ -279,7 +280,7 @@ CREATE TRIGGER trg_nha_si_updated_at
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
 
 -- ============================================================================
--- 09. NHÂN VIÊN (Level 1)
+-- 10. NHÂN VIÊN (Level 1)
 -- Luồng chính: Quản lý lễ tân, thu ngân, kho
 -- Phụ thuộc: tai_khoan
 -- ============================================================================
@@ -300,7 +301,7 @@ CREATE TABLE nhan_vien (
     
     -- Trường đặc thù
     chuc_vu      VARCHAR(30) NOT NULL
-                 CHECK (chuc_vu IN ('le_tan', 'quan_ly', 'quan_ly_kho')),
+                 CHECK (chuc_vu IN ('le_tan', 'quan_ly_kho','nhan_vien_kho')),
     trang_thai   VARCHAR(20) NOT NULL DEFAULT 'dang_lam_viec'
                  CHECK (trang_thai IN ('dang_lam_viec', 'nghi_phep', 'nghi_viec')),
                  
@@ -313,7 +314,7 @@ CREATE TRIGGER trg_nhan_vien_updated_at
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
 
 -- ============================================================================
--- 10. PHÒNG ĐIỀU TRỊ (Level 1)
+-- 11. PHÒNG ĐIỀU TRỊ (Level 1)
 -- Luồng chính: Phòng khám bệnh - cần trước khi tạo lịch hẹn
 -- Phụ thuộc: phong_kham
 -- ============================================================================
@@ -338,7 +339,7 @@ CREATE TRIGGER trg_phong_dieu_tri_updated_at
 
 
 -- ============================================================================
--- 11. SẢN PHẨM - NHÀ CUNG CẤP (Level 1)
+-- 12. SẢN PHẨM - NHÀ CUNG CẤP (Level 1)
 -- Luồng phụ: Liên kết sản phẩm với nhà cung cấp
 -- Phụ thuộc: san_pham, nha_cung_cap
 -- ============================================================================
@@ -364,7 +365,7 @@ CREATE TRIGGER trg_san_pham_nha_cung_cap_updated_at
 
 
 -- ============================================================================
--- 12. CHI TIẾT PHÁC ĐỒ MẪU (Level 1)
+-- 13. CHI TIẾT PHÁC ĐỒ MẪU (Level 1)
 -- Luồng phụ: Các bước trong template phác đồ
 -- Phụ thuộc: phac_do_mau, dich_vu
 -- ============================================================================
@@ -390,7 +391,7 @@ CREATE TRIGGER trg_chi_tiet_phac_do_mau_updated_at
 
 
 -- ============================================================================
--- 13. CA LÀM VIỆC (Level 2)
+-- 14. CA LÀM VIỆC (Level 2)
 -- Luồng chính: Lịch trực nha sĩ - cần TRƯỚC lịch hẹn (lich_hen FK → ca_lam_viec)
 -- Phụ thuộc: nha_si, phong_dieu_tri
 -- ============================================================================
@@ -417,7 +418,7 @@ CREATE TRIGGER trg_ca_lam_viec_updated_at
 
 
 -- ============================================================================
--- 14. PHIẾU NHẬP KHO (Level 2)
+-- 15. PHIẾU NHẬP KHO (Level 2)
 -- Luồng phụ: Quản lý nhập kho vật tư
 -- Phụ thuộc: nha_cung_cap, nhan_vien
 -- ============================================================================
@@ -446,7 +447,7 @@ CREATE TRIGGER trg_phieu_nhap_kho_updated_at
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
 
 -- ============================================================================
--- 15. LỊCH HẸN (Level 2)
+-- 16. LỊCH HẸN (Level 2)
 -- Luồng chính: Bước 3 - Bệnh nhân đặt lịch hẹn khám
 -- Phụ thuộc: benh_nhan, nha_si, dich_vu, 
 -- ============================================================================
@@ -480,7 +481,7 @@ CREATE TRIGGER trg_lich_hen_updated_at
 
 
 -- ============================================================================
--- 16. PHÁC ĐỒ ĐIỀU TRỊ (Level 2)
+-- 17. PHÁC ĐỒ ĐIỀU TRỊ (Level 2)
 -- Luồng phụ: Kế hoạch điều trị dài hạn cho bệnh nhân
 -- Phụ thuộc: benh_nhan, nha_si, phac_do_mau (optional)
 -- ============================================================================
@@ -519,7 +520,7 @@ CREATE TRIGGER trg_phac_do_dieu_tri_updated_at
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
 
 -- ============================================================================
--- 17. CHI TIẾT NHẬP KHO (Level 3)
+-- 18. CHI TIẾT NHẬP KHO (Level 3)
 -- Luồng phụ: Danh sách sản phẩm trong phiếu nhập kho
 -- Phụ thuộc: phieu_nhap_kho, san_pham
 -- ============================================================================
@@ -546,7 +547,7 @@ CREATE TRIGGER trg_chi_tiet_nhap_kho_updated_at
 
 
 -- ============================================================================
--- 18. HỒ SƠ BỆNH ÁN (Level 3)
+-- 19. HỒ SƠ BỆNH ÁN (Level 3)
 -- Luồng chính: Bước 4 - Nha sĩ tạo hồ sơ bệnh án khi khám
 -- Phụ thuộc: lich_hen (1:1)
 -- ============================================================================
@@ -575,7 +576,7 @@ CREATE TRIGGER trg_ho_so_benh_an_updated_at
 
 
 -- ============================================================================
--- 19. HÓA ĐƠN (Level 3)
+-- 20. HÓA ĐƠN (Level 3)
 -- Luồng chính: Bước 5 - Tạo hóa đơn sau khi khám xong
 -- Phụ thuộc: lich_hen, phac_do_dieu_tri (optional)
 -- ============================================================================
@@ -606,7 +607,7 @@ CREATE TRIGGER trg_hoa_don_updated_at
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
 
 -- ============================================================================
--- 20. DỊCH VỤ ĐIỀU TRỊ (Level 4)
+-- 21. DỊCH VỤ ĐIỀU TRỊ (Level 4)
 -- Luồng chính: Bước 4b - Chi tiết dịch vụ đã thực hiện trong buổi khám
 -- Phụ thuộc: ho_so_benh_an, dich_vu, nha_si
 -- ============================================================================

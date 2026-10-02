@@ -1,5 +1,5 @@
 -- ============================================================================
--- 09. NHÂN VIÊN (Level 1)
+-- 10. NHÂN VIÊN (Level 1)
 -- Luồng chính: Quản lý lễ tân, thu ngân, kho
 -- Phụ thuộc: tai_khoan
 -- ============================================================================
@@ -20,7 +20,7 @@ CREATE TABLE nhan_vien (
     
     -- Trường đặc thù
     chuc_vu      VARCHAR(30) NOT NULL
-                 CHECK (chuc_vu IN ('le_tan', 'quan_ly', 'quan_ly_kho')),
+                 CHECK (chuc_vu IN ('le_tan', 'quan_ly_kho','nhan_vien_kho')),
     trang_thai   VARCHAR(20) NOT NULL DEFAULT 'dang_lam_viec'
                  CHECK (trang_thai IN ('dang_lam_viec', 'nghi_phep', 'nghi_viec')),
                  

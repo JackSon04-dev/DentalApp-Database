@@ -1,22 +1,23 @@
 -- ============================================================================
--- 03. DỊCH VỤ (Level 0 - Bảng gốc)
--- Luồng chính: Danh mục dịch vụ nha khoa để đặt lịch hẹn
+-- 07. CHI TIẾT DỊCH VỤ (Level 1)
+-- Phụ thuộc: dich_vu
 -- ============================================================================
 
-DROP TABLE IF EXISTS dich_vu CASCADE;
-CREATE TABLE dich_vu (
+DROP TABLE IF EXISTS chi_tiet_dich_vu CASCADE;
+CREATE TABLE chi_tiet_dich_vu (
     id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    ma_dich_vu             VARCHAR(20) UNIQUE,
-    ten_dich_vu            VARCHAR(255) NOT NULL,
-    mo_ta                  TEXT,
-    thong_tin_quy_trinh    TEXT,
-    thoi_gian_du_kien_phut INTEGER DEFAULT 30,
+    dich_vu_id             UUID NOT NULL
+                           REFERENCES dich_vu(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    ma_chi_tiet           VARCHAR(20) UNIQUE,
+    ten_chi_tiet           VARCHAR(200) NOT NULL,
+    gia                    DECIMAL(18, 2) NOT NULL DEFAULT 0,
+    don_vi_tinh            VARCHAR(50),
     trang_thai             VARCHAR(20) NOT NULL DEFAULT 'hoat_dong'
                            CHECK (trang_thai IN ('hoat_dong', 'ngung_cung_cap')),
     created_at             TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at             TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TRIGGER trg_dich_vu_updated_at
-    BEFORE UPDATE ON dich_vu
+CREATE TRIGGER trg_chi_tiet_dich_vu_updated_at
+    BEFORE UPDATE ON chi_tiet_dich_vu
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
