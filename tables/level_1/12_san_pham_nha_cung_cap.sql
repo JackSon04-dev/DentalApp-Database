@@ -13,8 +13,8 @@ CREATE TABLE san_pham_nha_cung_cap (
                              REFERENCES nha_cung_cap(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     ma_san_pham_ncc          VARCHAR(100),
     ghi_chu                  VARCHAR(500),
-    created_at               TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at               TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_at               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT uq_sanpham_nhacungcap UNIQUE (san_pham_id, nha_cung_cap_id)
 );

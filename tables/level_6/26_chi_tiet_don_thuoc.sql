@@ -14,14 +14,15 @@ CREATE TABLE chi_tiet_don_thuoc (
     ham_luong     VARCHAR(100),
     dang_bao_che  VARCHAR(100),
     lieu_dung     VARCHAR(200),
-    so_luong      INTEGER NOT NULL,
+    so_luong      INTEGER NOT NULL
+                  CHECK (so_luong > 0),
     don_vi_tinh   VARCHAR(50),
     so_lan_ngay   INTEGER,
     thoi_diem_uong VARCHAR(100),
     huong_dan     TEXT,
     ghi_chu       TEXT,
-    created_at    TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at    TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 

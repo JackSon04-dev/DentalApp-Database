@@ -14,7 +14,7 @@ CREATE TABLE benh_nhan (
     ngay_sinh              DATE,
     gioi_tinh              VARCHAR(10) CHECK (gioi_tinh IN ('nam', 'nu', 'khac')),
     sdt                    VARCHAR(20) UNIQUE,
-    email                  VARCHAR(150),
+    email                  VARCHAR(150) UNIQUE,
     dia_chi                VARCHAR(500),
     hinh_anh_url           VARCHAR(500),
     
@@ -23,8 +23,8 @@ CREATE TABLE benh_nhan (
     di_ung                 TEXT,
     ghi_chu                TEXT,
     
-    created_at             TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at             TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at             TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at             TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TRIGGER trg_benh_nhan_updated_at

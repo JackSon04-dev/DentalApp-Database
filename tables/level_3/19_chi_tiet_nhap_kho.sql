@@ -11,13 +11,15 @@ CREATE TABLE chi_tiet_nhap_kho (
                   REFERENCES phieu_nhap_kho(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     san_pham_id   UUID NOT NULL
                   REFERENCES san_pham(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    so_luong      INTEGER NOT NULL,
-    don_gia_nhap  DECIMAL(18, 2) NOT NULL,
+    so_luong      INTEGER NOT NULL
+                  CHECK (so_luong > 0),
+    don_gia_nhap  DECIMAL(18, 2) NOT NULL
+                  CHECK (don_gia_nhap >= 0),
     so_lo         VARCHAR(50),
     han_su_dung   DATE,
     ghi_chu       VARCHAR(500),
-    created_at    TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at    TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TRIGGER trg_chi_tiet_nhap_kho_updated_at

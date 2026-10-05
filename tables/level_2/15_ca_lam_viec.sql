@@ -16,8 +16,29 @@ CREATE TABLE ca_lam_viec (
     gio_ket_thuc      TIME NOT NULL,
     trang_thai        VARCHAR(20) NOT NULL DEFAULT 'trong'
                       CHECK (trang_thai IN ('trong', 'dang_lam', 'nghi')),
-    created_at        TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at        TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    -- 1. Giờ bắt đầu phải trước giờ kết thúc
+    CONSTRAINT chk_gio_hop_le CHECK (gio_bat_dau < gio_ket_thuc),
+
+    -- 2. Chống chồng ca cho cùng 1 nha sĩ trong cùng 1 ngày
+    CONSTRAINT no_overlap_nha_si_ca EXCLUDE USING gist (
+        nha_si_id WITH =,
+        tsrange(
+            (ngay || ' ' || gio_bat_dau)::timestamp,
+            (ngay || ' ' || gio_ket_thuc)::timestamp
+        ) WITH &&
+    ) WHERE (trang_thai != 'nghi'),
+
+    -- 3. Chống chồng ca cho cùng 1 phòng điều trị trong cùng 1 ngày
+    CONSTRAINT no_overlap_phong_ca EXCLUDE USING gist (
+        phong_dieu_tri_id WITH =,
+        tsrange(
+            (ngay || ' ' || gio_bat_dau)::timestamp,
+            (ngay || ' ' || gio_ket_thuc)::timestamp
+        ) WITH &&
+    ) WHERE (trang_thai != 'nghi')
 );
 
 CREATE TRIGGER trg_ca_lam_viec_updated_at

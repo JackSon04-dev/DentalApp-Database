@@ -14,18 +14,18 @@ CREATE TABLE nhan_vien (
     ngay_sinh    DATE,
     gioi_tinh    VARCHAR(10) CHECK (gioi_tinh IN ('nam', 'nu', 'khac')),
     sdt          VARCHAR(20) UNIQUE,
-    email        VARCHAR(150),
+    email        VARCHAR(150) UNIQUE,
     dia_chi      VARCHAR(500),
     hinh_anh_url VARCHAR(500),
     
     -- Trường đặc thù
     chuc_vu      VARCHAR(30) NOT NULL
-                 CHECK (chuc_vu IN ('le_tan', 'quan_ly_kho','nhan_vien_kho')),
+                 CHECK (chuc_vu IN ('le_tan', 'quan_ly_kho', 'nhan_vien_kho')),
     trang_thai   VARCHAR(20) NOT NULL DEFAULT 'dang_lam_viec'
                  CHECK (trang_thai IN ('dang_lam_viec', 'nghi_phep', 'nghi_viec')),
                  
-    created_at   TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at   TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TRIGGER trg_nhan_vien_updated_at

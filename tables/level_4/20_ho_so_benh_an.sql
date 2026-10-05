@@ -18,8 +18,8 @@ CREATE TABLE ho_so_benh_an (
     ngay_tai_kham         DATE,
     tinh_trang_rang_mieng TEXT,
     ghi_chu               TEXT,
-    created_at            TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at            TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TRIGGER trg_ho_so_benh_an_updated_at

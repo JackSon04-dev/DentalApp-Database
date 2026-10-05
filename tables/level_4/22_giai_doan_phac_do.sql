@@ -23,13 +23,14 @@ CREATE TABLE giai_doan_phac_do (
     mo_ta_vat_tu_dich_vu TEXT,
     
     -- 3. TÀI CHÍNH (Hardcode)
-    chi_phi_du_kien    DECIMAL(18, 2) NOT NULL DEFAULT 0,
+    chi_phi    DECIMAL(18, 2) NOT NULL DEFAULT 0
+               CHECK (chi_phi >= 0),
     trang_thai_thanh_toan VARCHAR(20) NOT NULL DEFAULT 'chua_thanh_toan'
-                       CHECK (trang_thai_thanh_toan IN ('chua_thanh_toan', 'thanh_toan_mot_phan', 'da_thanh_toan')),
+                       CHECK (trang_thai_thanh_toan IN ('chua_thanh_toan', 'da_thanh_toan')),
     
     -- 4. LIÊN KẾT LUỒNG KHÁM
     lich_hen_id        UUID UNIQUE 
-                       REFERENCES lich_hen(id) ON DELETE SET NULL ON UPDATE CASCADE,
+                       REFERENCES lich_hen(id) ON DELETE RESTRICT ON UPDATE CASCADE,
                        
     -- 5. TIẾN ĐỘ & TRẠNG THÁI
     trang_thai         VARCHAR(20) NOT NULL DEFAULT 'chua_thuc_hien'
@@ -42,8 +43,10 @@ CREATE TABLE giai_doan_phac_do (
     co_phat_sinh       BOOLEAN NOT NULL DEFAULT FALSE,
     ghi_chu            TEXT,
     
-    created_at         TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at         TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_buoc_so_giai_doan UNIQUE (phac_do_id, buoc_so)
 );
 
 CREATE TRIGGER trg_giai_doan_phac_do_updated_at

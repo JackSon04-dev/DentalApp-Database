@@ -10,11 +10,10 @@ CREATE TABLE phac_do_mau (
     ma_phac_do_mau       VARCHAR(30) UNIQUE,
     ten_phac_do_mau      VARCHAR(200) NOT NULL,
     mo_ta                TEXT,
-    so_buoc              INTEGER DEFAULT 0,
     trang_thai           VARCHAR(20) NOT NULL DEFAULT 'hoat_dong'
-                         CHECK (trang_thai IN ('hoat_dong', 'ngung_su_dung')),
-    created_at           TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at           TIMESTAMP NOT NULL DEFAULT NOW()
+                         CHECK (trang_thai IN ('hoat_dong', 'ngung_hoat_dong')),
+    created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TRIGGER trg_phac_do_mau_updated_at
