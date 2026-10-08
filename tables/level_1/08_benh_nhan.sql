@@ -7,7 +7,7 @@
 DROP TABLE IF EXISTS benh_nhan CASCADE;
 CREATE TABLE benh_nhan (
     id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tai_khoan_id           UUID NOT NULL UNIQUE
+    tai_khoan_id           UUID UNIQUE,
                            REFERENCES tai_khoan(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     ma_benh_nhan           VARCHAR(30) UNIQUE,
     ho_ten                 VARCHAR(150) NOT NULL,

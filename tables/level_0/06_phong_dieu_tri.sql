@@ -1,5 +1,5 @@
 -- ============================================================================
--- 11. PHÒNG ĐIỀU TRỊ (Level 0 - Bảng gốc, không còn phụ thuộc phong_kham)
+-- 06. PHÒNG ĐIỀU TRỊ (Level 0 - Bảng gốc, không còn phụ thuộc phong_kham)
 -- Luồng chính: Phòng khám bệnh - cần trước khi tạo ca làm việc
 -- Phụ thuộc: KHÔNG
 -- ============================================================================

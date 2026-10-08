@@ -1,4 +1,10 @@
-﻿-- ============================================================================
+-- ============================================================================
+-- DENTAL CLINIC DATABASE - SCHEMA TỔNG HỢP
+-- Tự động sinh từ 22 file SQL theo thứ tự dependency (Level 0 → 6)
+-- Ngày cập nhật: 2026-10-08
+-- ============================================================================
+
+-- ============================================================================
 -- FILE KHỞI TẠO: Extension + Trigger Function
 -- Chạy file này ĐẦU TIÊN trước khi import bất kỳ table nào
 -- ============================================================================
@@ -14,6 +20,8 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+
 -- ============================================================================
 -- 01. TÀI KHOẢN (Level 0 - Bảng gốc)
 -- Luồng chính: Bước 1 - Tạo tài khoản đăng nhập
@@ -38,8 +46,10 @@ CREATE TABLE tai_khoan (
 CREATE TRIGGER trg_tai_khoan_updated_at
     BEFORE UPDATE ON tai_khoan
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
+
 -- ============================================================================
--- 03. DỊCH VỤ (Level 0 - Bảng gốc)
+-- 02. DỊCH VỤ (Level 0 - Bảng gốc)
 -- Luồng chính: Danh mục dịch vụ nha khoa để đặt lịch hẹn
 -- Phụ thuộc: KHÔNG
 -- ============================================================================
@@ -61,8 +71,9 @@ CREATE TABLE dich_vu (
 CREATE TRIGGER trg_dich_vu_updated_at
     BEFORE UPDATE ON dich_vu
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
 -- ============================================================================
--- 04. SẢN PHẨM (Level 0 - Bảng gốc)
+-- 03. SẢN PHẨM (Level 0 - Bảng gốc)
 -- Lưu theo dạng bảng variant đơn (chỉ lưu 1 bảng chứa thông tin chi tiết)
 -- Luồng phụ: Quản lý kho vật tư, dụng cụ
 -- ============================================================================
@@ -92,35 +103,10 @@ CREATE TABLE san_pham (
 CREATE TRIGGER trg_san_pham_updated_at
     BEFORE UPDATE ON san_pham
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
--- ============================================================================
--- 05. NHÀ CUNG CẤP (Level 0 - Bảng gốc)
--- Luồng phụ: Quản lý nhà cung cấp vật tư
--- Phụ thuộc: KHÔNG
--- ============================================================================
 
-DROP TABLE IF EXISTS nha_cung_cap CASCADE;
-CREATE TABLE nha_cung_cap (
-    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    ma_ncc            VARCHAR(30) UNIQUE,
-    ten_ncc           VARCHAR(200) NOT NULL,
-    dia_chi           VARCHAR(500),
-    sdt               VARCHAR(20) UNIQUE,
-    email             VARCHAR(150),
-    ma_so_thue        VARCHAR(20),
-    nguoi_lien_he     VARCHAR(150),
-    sdt_nguoi_lien_he VARCHAR(20),
-    ghi_chu           TEXT,
-    trang_thai        VARCHAR(20) NOT NULL DEFAULT 'hoat_dong'
-                      CHECK (trang_thai IN ('hoat_dong', 'ngung_hoat_dong')),
-    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
 
-CREATE TRIGGER trg_nha_cung_cap_updated_at
-    BEFORE UPDATE ON nha_cung_cap
-    FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
 -- ============================================================================
--- 06. PHÁC ĐỒ MẪU (Level 0 - Bảng gốc)
+-- 04. PHÁC ĐỒ MẪU (Level 0 - Bảng gốc)
 -- Luồng phụ: Template phác đồ điều trị
 -- Phụ thuộc: KHÔNG
 -- ============================================================================
@@ -140,8 +126,10 @@ CREATE TABLE phac_do_mau (
 CREATE TRIGGER trg_phac_do_mau_updated_at
     BEFORE UPDATE ON phac_do_mau
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
+
 -- ============================================================================
--- 07. KHUYẾN MÃI / VOUCHER (Level 0)
+-- 05. KHUYẾN MÃI / VOUCHER (Level 0)
 -- Luồng phụ: Quản lý các chương trình giảm giá, voucher
 -- Phụ thuộc: KHÔNG
 -- ============================================================================
@@ -168,8 +156,10 @@ CREATE TABLE khuyen_mai (
 CREATE TRIGGER trg_khuyen_mai_updated_at
     BEFORE UPDATE ON khuyen_mai
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
+
 -- ============================================================================
--- 11. PHÒNG ĐIỀU TRỊ (Level 0 - Bảng gốc, không còn phụ thuộc phong_kham)
+-- 06. PHÒNG ĐIỀU TRỊ (Level 0 - Bảng gốc, không còn phụ thuộc phong_kham)
 -- Luồng chính: Phòng khám bệnh - cần trước khi tạo ca làm việc
 -- Phụ thuộc: KHÔNG
 -- ============================================================================
@@ -189,6 +179,8 @@ CREATE TABLE phong_dieu_tri (
 CREATE TRIGGER trg_phong_dieu_tri_updated_at
     BEFORE UPDATE ON phong_dieu_tri
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
+
 -- ============================================================================
 -- 07. CHI TIẾT DỊCH VỤ (Level 1)
 -- Phụ thuộc: dich_vu
@@ -213,6 +205,7 @@ CREATE TABLE chi_tiet_dich_vu (
 CREATE TRIGGER trg_chi_tiet_dich_vu_updated_at
     BEFORE UPDATE ON chi_tiet_dich_vu
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
 -- ============================================================================
 -- 08. BỆNH NHÂN (Level 1)
 -- Luồng chính: Quản lý thông tin hồ sơ y tế bệnh nhân
@@ -245,6 +238,7 @@ CREATE TABLE benh_nhan (
 CREATE TRIGGER trg_benh_nhan_updated_at
     BEFORE UPDATE ON benh_nhan
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
 -- ============================================================================
 -- 09. NHA SĨ (Level 1)
 -- Luồng chính: Quản lý thông tin bác sĩ điều trị
@@ -279,6 +273,7 @@ CREATE TABLE nha_si (
 CREATE TRIGGER trg_nha_si_updated_at
     BEFORE UPDATE ON nha_si
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
 -- ============================================================================
 -- 10. NHÂN VIÊN (Level 1)
 -- Luồng chính: Quản lý lễ tân, thu ngân, kho
@@ -301,7 +296,7 @@ CREATE TABLE nhan_vien (
     
     -- Trường đặc thù
     chuc_vu      VARCHAR(30) NOT NULL
-                 CHECK (chuc_vu IN ('le_tan', 'quan_ly_kho', 'nhan_vien_kho')),
+                 CHECK (chuc_vu IN ('le_tan', 'ke_toan', 'quan_ly')),
     trang_thai   VARCHAR(20) NOT NULL DEFAULT 'dang_lam_viec'
                  CHECK (trang_thai IN ('dang_lam_viec', 'nghi_phep', 'nghi_viec')),
                  
@@ -312,32 +307,9 @@ CREATE TABLE nhan_vien (
 CREATE TRIGGER trg_nhan_vien_updated_at
     BEFORE UPDATE ON nhan_vien
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
--- ============================================================================
--- 12. SẢN PHẨM - NHÀ CUNG CẤP (Level 1)
--- Luồng phụ: Liên kết sản phẩm với nhà cung cấp
--- Phụ thuộc: san_pham, nha_cung_cap
--- ============================================================================
 
-DROP TABLE IF EXISTS san_pham_nha_cung_cap CASCADE;
-CREATE TABLE san_pham_nha_cung_cap (
-    id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    san_pham_id              UUID NOT NULL
-                             REFERENCES san_pham(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    nha_cung_cap_id          UUID NOT NULL
-                             REFERENCES nha_cung_cap(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    ma_san_pham_ncc          VARCHAR(100),
-    ghi_chu                  VARCHAR(500),
-    created_at               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
-    CONSTRAINT uq_sanpham_nhacungcap UNIQUE (san_pham_id, nha_cung_cap_id)
-);
-
-CREATE TRIGGER trg_san_pham_nha_cung_cap_updated_at
-    BEFORE UPDATE ON san_pham_nha_cung_cap
-    FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
 -- ============================================================================
--- 13. CHI TIẾT PHÁC ĐỒ MẪU (Level 1)
+-- 11. CHI TIẾT PHÁC ĐỒ MẪU (Level 1)
 -- Luồng phụ: Các bước trong template phác đồ
 -- Phụ thuộc: phac_do_mau, dich_vu
 -- ============================================================================
@@ -363,6 +335,8 @@ CREATE TABLE chi_tiet_phac_do_mau (
 CREATE TRIGGER trg_chi_tiet_phac_do_mau_updated_at
     BEFORE UPDATE ON chi_tiet_phac_do_mau
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
+
 -- ============================================================================
 -- 08b_audit_log.sql (Level 1)
 -- Nhật ký kiểm toán (Audit Log)
@@ -395,8 +369,10 @@ CREATE TABLE audit_log (
 
 
 
+
+
 -- ============================================================================
--- 14. CA LÀM VIỆC (Level 2)
+-- 13. CA LÀM VIỆC (Level 2)
 -- Luồng chính: Lịch trực nha sĩ - cần TRƯỚC lịch hẹn (lich_hen FK → ca_lam_viec)
 -- Phụ thuộc: nha_si, phong_dieu_tri
 -- ============================================================================
@@ -441,40 +417,10 @@ CREATE TABLE ca_lam_viec (
 CREATE TRIGGER trg_ca_lam_viec_updated_at
     BEFORE UPDATE ON ca_lam_viec
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
--- ============================================================================
--- 15. PHIẾU NHẬP KHO (Level 2)
--- Luồng phụ: Quản lý nhập kho vật tư
--- Phụ thuộc: nha_cung_cap, nhan_vien
--- ============================================================================
 
 
-DROP TABLE IF EXISTS phieu_nhap_kho CASCADE;
-CREATE TABLE phieu_nhap_kho (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    ma_phieu_nhap_kho   VARCHAR(30) UNIQUE,
-    nha_cung_cap_id UUID NOT NULL
-                    REFERENCES nha_cung_cap(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    nhan_vien_id    UUID NOT NULL
-                    REFERENCES nhan_vien(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    ngay_nhap       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    trang_thai      VARCHAR(20) NOT NULL DEFAULT 'nhap_moi'
-                    CHECK (trang_thai IN ('nhap_moi', 'da_duyet', 'da_huy')),
-    nguoi_duyet_id  UUID
-                    REFERENCES nhan_vien(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    ngay_duyet      TIMESTAMPTZ,
-    ly_do_huy       TEXT,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
-    -- Người duyệt không được là người lập phiếu (trừ khi chưa duyệt)
-    CONSTRAINT chk_nguoi_duyet_khac_nguoi_lap CHECK (nguoi_duyet_id IS NULL OR nguoi_duyet_id != nhan_vien_id)
-);
-
-CREATE TRIGGER trg_phieu_nhap_kho_updated_at
-    BEFORE UPDATE ON phieu_nhap_kho
-    FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
 -- ============================================================================
--- 17. PHÁC ĐỒ ĐIỀU TRỊ (Level 2)
+-- 14. PHÁC ĐỒ ĐIỀU TRỊ (Level 2)
 -- Luồng phụ: Kế hoạch điều trị dài hạn cho bệnh nhân
 -- Phụ thuộc: benh_nhan, nha_si, phac_do_mau (optional)
 -- ============================================================================
@@ -511,8 +457,9 @@ CREATE TABLE phac_do_dieu_tri (
 CREATE TRIGGER trg_phac_do_dieu_tri_updated_at
     BEFORE UPDATE ON phac_do_dieu_tri
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
 -- ============================================================================
--- 16. LỊCH HẸN (Level 2)
+-- 15. LỊCH HẸN (Level 2)
 -- Luồng chính: Bước 3 - Bệnh nhân đặt lịch hẹn khám
 -- Phụ thuộc: benh_nhan, ca_lam_viec, dich_vu
 -- ============================================================================
@@ -556,35 +503,10 @@ CREATE TABLE lich_hen (
 CREATE TRIGGER trg_lich_hen_updated_at
     BEFORE UPDATE ON lich_hen
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
--- ============================================================================
--- 18. CHI TIẾT NHẬP KHO (Level 3)
--- Luồng phụ: Danh sách sản phẩm trong phiếu nhập kho
--- Phụ thuộc: phieu_nhap_kho, san_pham
--- ============================================================================
 
-DROP TABLE IF EXISTS chi_tiet_nhap_kho CASCADE;
-CREATE TABLE chi_tiet_nhap_kho (
-    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    phieu_nhap_id UUID NOT NULL
-                  REFERENCES phieu_nhap_kho(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    san_pham_id   UUID NOT NULL
-                  REFERENCES san_pham(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    so_luong      INTEGER NOT NULL
-                  CHECK (so_luong > 0),
-    don_gia_nhap  DECIMAL(18, 2) NOT NULL
-                  CHECK (don_gia_nhap >= 0),
-    so_lo         VARCHAR(50),
-    han_su_dung   DATE,
-    ghi_chu       VARCHAR(500),
-    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
 
-CREATE TRIGGER trg_chi_tiet_nhap_kho_updated_at
-    BEFORE UPDATE ON chi_tiet_nhap_kho
-    FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
 -- ============================================================================
--- 19. HỒ SƠ BỆNH ÁN (Level 3)
+-- 16. HỒ SƠ BỆNH ÁN (Level 3)
 -- Luồng chính: Bước 4 - Nha sĩ tạo hồ sơ bệnh án khi khám
 -- Phụ thuộc: lich_hen (1:1)
 -- ============================================================================
@@ -610,8 +532,10 @@ CREATE TABLE ho_so_benh_an (
 CREATE TRIGGER trg_ho_so_benh_an_updated_at
     BEFORE UPDATE ON ho_so_benh_an
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
+
 -- ============================================================================
--- 20. HÓA ĐƠN (Level 3)
+-- 17. HÓA ĐƠN (Level 3)
 -- Luồng chính: Bước 5 - Tạo hóa đơn sau khi khám xong
 -- Phụ thuộc: lich_hen, phac_do_dieu_tri (optional), nhan_vien
 -- ============================================================================
@@ -646,8 +570,9 @@ CREATE TABLE hoa_don (
 CREATE TRIGGER trg_hoa_don_updated_at
     BEFORE UPDATE ON hoa_don
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
 -- ============================================================================
--- 25. GIAI ĐOẠN PHÁC ĐỒ (Level 4)
+-- 18. GIAI ĐOẠN PHÁC ĐỒ (Level 4)
 -- Luồng chính: Bản sao chép (Snapshot) từ Phác đồ mẫu, được cá nhân hóa.
 -- Chi phí dự kiến được hardcode, mô tả vật tư/dịch vụ lưu dạng text.
 -- Dữ liệu FK chính xác chỉ nằm ở dich_vu_dieu_tri và vat_tu_su_dung (qua ho_so_benh_an).
@@ -700,8 +625,10 @@ CREATE TABLE giai_doan_phac_do (
 CREATE TRIGGER trg_giai_doan_phac_do_updated_at
     BEFORE UPDATE ON giai_doan_phac_do
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
+
 -- ============================================================================
--- 21. DỊCH VỤ ĐIỀU TRỊ (Level 4)
+-- 19. DỊCH VỤ ĐIỀU TRỊ (Level 4)
 -- Luồng chính: Bước 4b - Chi tiết dịch vụ đã thực hiện trong buổi khám
 -- Phụ thuộc: ho_so_benh_an, chi_tiet_dich_vu
 -- ============================================================================
@@ -726,8 +653,10 @@ CREATE TABLE dich_vu_dieu_tri (
 CREATE TRIGGER trg_dich_vu_dieu_tri_updated_at
     BEFORE UPDATE ON dich_vu_dieu_tri
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
+
 -- ============================================================================
--- 23. ĐƠN THUỐC (Level 4)
+-- 20. ĐƠN THUỐC (Level 4)
 -- Luồng phụ: Nha sĩ kê đơn thuốc mua ngoài sau khám
 -- Phụ thuộc: ho_so_benh_an, nha_si
 -- ============================================================================
@@ -752,8 +681,10 @@ CREATE TABLE don_thuoc (
 CREATE TRIGGER trg_don_thuoc_updated_at
     BEFORE UPDATE ON don_thuoc
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
+
 -- ============================================================================
--- 24. VẬT TƯ SỬ DỤNG (Level 4)
+-- 21. VẬT TƯ SỬ DỤNG (Level 4)
 -- Luồng phụ: Ghi nhận vật tư tiêu hao trong buổi điều trị
 -- Phụ thuộc: ho_so_benh_an, san_pham
 -- ============================================================================
@@ -777,8 +708,10 @@ CREATE TABLE vat_tu_su_dung (
 CREATE TRIGGER trg_vat_tu_su_dung_updated_at
     BEFORE UPDATE ON vat_tu_su_dung
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
+
 -- ============================================================================
--- 26. CHI TIẾT ĐƠN THUỐC (Level 5)
+-- 22. CHI TIẾT ĐƠN THUỐC (Level 5)
 -- Luồng phụ: Từng dòng thuốc trong đơn thuốc kê ngoài
 -- Phụ thuộc: don_thuoc
 -- ============================================================================
@@ -808,3 +741,5 @@ CREATE TABLE chi_tiet_don_thuoc (
 CREATE TRIGGER trg_chi_tiet_don_thuoc_updated_at
     BEFORE UPDATE ON chi_tiet_don_thuoc
     FOR EACH ROW EXECUTE FUNCTION fn_cap_nhat_updated_at();
+
+

@@ -1,5 +1,5 @@
 -- ============================================================================
--- 25. GIAI ĐOẠN PHÁC ĐỒ (Level 4)
+-- 18. GIAI ĐOẠN PHÁC ĐỒ (Level 4)
 -- Luồng chính: Bản sao chép (Snapshot) từ Phác đồ mẫu, được cá nhân hóa.
 -- Chi phí dự kiến được hardcode, mô tả vật tư/dịch vụ lưu dạng text.
 -- Dữ liệu FK chính xác chỉ nằm ở dich_vu_dieu_tri và vat_tu_su_dung (qua ho_so_benh_an).

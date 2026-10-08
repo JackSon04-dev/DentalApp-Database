@@ -1,5 +1,5 @@
 -- ============================================================================
--- 16. LỊCH HẸN (Level 2)
+-- 15. LỊCH HẸN (Level 2)
 -- Luồng chính: Bước 3 - Bệnh nhân đặt lịch hẹn khám
 -- Phụ thuộc: benh_nhan, ca_lam_viec, dich_vu
 -- ============================================================================
@@ -19,7 +19,7 @@ CREATE TABLE lich_hen (
     gio_ket_thuc_du_kien TIME NOT NULL,
     trang_thai           VARCHAR(20) NOT NULL DEFAULT 'cho_xac_nhan'
                          CHECK (trang_thai IN (
-                             'cho_xac_nhan', 'da_xac_nhan', 'cho_kham',
+                             'cho_xac_nhan', 'da_xac_nhan',
                              'dang_kham', 'da_kham', 'huy'
                          )),
     ly_do_huy            TEXT,

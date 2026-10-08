@@ -20,7 +20,7 @@ CREATE TABLE nhan_vien (
     
     -- Trường đặc thù
     chuc_vu      VARCHAR(30) NOT NULL
-                 CHECK (chuc_vu IN ('le_tan', 'quan_ly_kho', 'nhan_vien_kho')),
+                 CHECK (chuc_vu IN ('le_tan', 'ke_toan', 'quan_ly')),
     trang_thai   VARCHAR(20) NOT NULL DEFAULT 'dang_lam_viec'
                  CHECK (trang_thai IN ('dang_lam_viec', 'nghi_phep', 'nghi_viec')),
                  
